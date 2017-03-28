@@ -15,10 +15,11 @@ class City
   public:
     City();
     City(string cityName, double cityLatitude, double cityLongitude);
-    getName();
-    getLat();
-    getLong();
-    display();
+    string getName();
+    double getLat();
+    double getLong();
+    void display1();
+    void display2();
   private:
     string name;
     double latitude;
