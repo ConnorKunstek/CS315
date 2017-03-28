@@ -19,44 +19,64 @@ using namespace std;
 #define EARTHMILES 3959
 
 /* Splits a string on specified delimiters. It will match the delimiters greedily. */
-vector<string> split( string line, string delimiters )
+vector<string> split(string line, string delimiters)
 {
   vector<string> result;
 
   int start_loc = 0;
   bool is_delim = true;
   int curr_loc = 0;
-  for( char curr_char : line ){
-  // Check if delimiter
-  bool found_del = false;
-  for(char delim : delimiters)
+  for(char curr_char : line)
   {
-    if(curr_char == delim)
+    // Check if delimiter
+    bool found_del = false;
+    for(char delim : delimiters)
     {
-      found_del = true;
-      // If wasn't a delimeter then start_loc -> curr_loc is a word
-      if( !is_delim )
+      if(curr_char == delim)
       {
-        result.push_back(line.substr(start_loc, i-start_loc));
+        found_del = true;
+        // If wasn't a delimeter then start_loc -> curr_loc is a word
+        if(!is_delim)
+        {
+          result.push_back(line.substr(start_loc, curr_loc-start_loc));
+        }
+        break;
       }
-      break;
     }
-  }
-  // If no delimeter matched
-  if(!found_del && is_delim)
-  {
-    is_delim = false;
-    start_loc = curr_loc;
-  }
-  is_delim = found_del;
-  curr_loc++;
+    // If no delimeter matched
+    if(!found_del && is_delim)
+    {
+      is_delim = false;
+      start_loc = curr_loc;
+    }
+    is_delim = found_del;
+    curr_loc++;
   }
   // Check if the last word ended at the end of the string, start_loc -> end
   if(!is_delim)
   {
-    result.push_back(line.substr(start_loc, i-start_loc));
+    result.push_back(line.substr(start_loc, curr_loc-start_loc));
   }
   return result;
+}
+
+bool isLessThan(City city1, City City2, string type)
+{
+  bool returnVar = true;
+
+  if (type == "latitudes")
+  {
+    returnVar = (city1.getLat() < city2.getLat());
+  }
+  else if (type == "longitudes")
+  {
+    returnVar = (city1.getLong() < city2.getLong());
+  }
+  else
+  {
+    returnVar = (city1.getName() < city2.getName());
+  }
+  return returnVar;
 }
 
 double convertToKm(double miles)
@@ -79,16 +99,16 @@ double convertToRadians(double degrees)
 
 double convertToDegree(double radians)
 {
-  double degrees = (rad * 180 / PI);
+  double degrees = (radians * 180 / PI);
   return degrees;
 }
 
 double findDistance(City city1, City city2)
 {
-  double lat1 = convertToRadians(city1.getLat());
-  double long1 = convertToRadians(city1.getLong());
-  double lat2 = convertToRadians(city2.getLat());
-  double long2 = convertToRadians(city2.getLong());
+  double lat1 = convertToRadians(city1->getLat());
+  double long1 = convertToRadians(city1->getLong());
+  double lat2 = convertToRadians(city2->getLat());
+  double long2 = convertToRadians(city2->getLong());
 
   double lat = lat2 - lat1;
   double lng = long2 - long1;
@@ -110,10 +130,16 @@ int main(int argc, char *argv[] )
   //Timer Started
 
   //Maps needed
-  map<string, City> cities;
-  map<string, City> names;
-  map<double, City> lats;
-  map<double, City> longs;
+  map<string, City*> cities;
+  map<string, City*> names;
+  map<double, City*> lats;
+  map<double, City*> longs;
+
+  vector<City> cityList;
+
+  string name = "NULL";
+  double latitude = 0.0;
+  double longitude = 0.0;
 
   //data file read in
   string line;
@@ -125,8 +151,13 @@ int main(int argc, char *argv[] )
     vector<string> parts = split(line, " ,\t");
     // You are going to need to process the line of text somehow... split is helpful
     // TODO
-    vector<City> cityList;
-    City temp = new City(parts[0], stod(parts[1]), stod(parts[2]));
+
+    name = parts[0];
+    latitude = stod(parts[1]);
+    longitude = stod(parts[2]);
+
+
+    City temp = City(name, latitude, longitude);
     cityList.push_back(temp);
     /*
     city_key = parts[0];
@@ -141,14 +172,17 @@ int main(int argc, char *argv[] )
     */
 
     //STILL IN WHILE LOOP
-    names.insert(make_pair(parts[0], temp));
-    lats.insert(make_pair(parts[1], temp));
-    longs.insert(make_pair(parts[2], temp));
+    //cities.insert(make_pair(name, temp));
+    //names.insert(make_pair(name, temp));
+    //lats.insert(make_pair(latitude, temp));
+    //longs.insert(make_pair(longitude, temp));
   }
+
+  sort(cities.begin(), cities.end(), isLessThan())
 
   //compute distance East to West
   double westEast = 0.0;
-  for (map<double, City*>::iterator current=longs.begin(); current!=longs.end(); ++current)
+  for ()
   {
     map<double, City*>::iterator next = current; // creating second iterator to access other set of coordinates
     ++next; //iterating the iterator
@@ -156,7 +190,7 @@ int main(int argc, char *argv[] )
     // Logic to ensure that a non-existent index tries to be accessed
     if (next != longs.end())
     {
-      westEast += findDistance(current, next); //using haversine formula to compute distance and adding to running sum
+      westEast += findDistance(longs[current], longs[next]->second); //using haversine formula to compute distance and adding to running sum
     }
   }
 
@@ -170,7 +204,7 @@ int main(int argc, char *argv[] )
     // Logic to ensure that a non-existent index tries to be accessed
     if (next != lats.end())
     {
-      northSouth += findDistance(current, next);
+      northSouth += findDistance(lats[current]->second, lats[next]->second);
     }
   }
 
