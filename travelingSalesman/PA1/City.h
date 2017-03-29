@@ -7,8 +7,8 @@
 #include<iostream>
 
 using namespace std;
-#ifndef CLASSES_H
-#define CLASSES_H
+#ifndef City_h
+#define City_h
 
 class City
 {
